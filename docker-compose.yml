@@ -1,0 +1,13 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: glassy
+      POSTGRES_PASSWORD: glassy123
+      POSTGRES_DB: glassy_pm
+    ports:
+      - "5432:5432"
+    volumes:
+      - glassy_pgdata:/var/lib/postgresql/data
+volumes:
+  glassy_pgdata:
