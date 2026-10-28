@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Glassy PM — Entrar / Cadastrar</title>
+<script src="api-client.js"></script>
+<style>body{font-family:system-ui,sans-serif;background:#f3f3f6;color:#111827;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0}
+.card{background:#fff;border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,.08);padding:28px;width:min(420px,92vw)}
+h1{margin:0 0 4px}.muted{color:#6b7280;font-size:14px}
+input{width:100%;padding:12px;border-radius:12px;border:1px solid #e5e7eb;margin-top:8px;box-sizing:border-box}
+button{width:100%;padding:12px;border-radius:12px;border:0;background:#111827;color:#fff;font-weight:700;margin-top:14px;cursor:pointer}
+a{color:#111827}.tabs{display:flex;gap:8px;margin:16px 0}.tabs button{background:#f3f4f6;color:#111827;margin:0}.tabs button.active{background:#111827;color:#fff}
+#msg{font-size:14px;margin-top:12px;min-height:20px}</style></head>
+<body><div class="card">
+<h1>⬢ Glassy PM</h1><p class="muted">Entre para ver seus projetos, ou crie sua conta.</p>
+<div class="tabs"><button id="tabLogin" class="active" onclick="setTab('login')">Entrar</button><button id="tabReg" onclick="setTab('register')">Cadastrar</button></div>
+<div id="regName" style="display:none"><input id="name" placeholder="Seu nome"></div>
+<input id="email" type="email" placeholder="Email">
+<input id="password" type="password" placeholder="Senha (mín. 8 caracteres)">
+<button onclick="submitAuth()">Continuar</button>
+<p style="text-align:center;font-size:14px"><a href="#" onclick="forgot(event)">Esqueci minha senha</a></p>
+<div id="forgotBox" style="display:none"><input id="forgotEmail" type="email" placeholder="Email da conta"><button onclick="sendForgot()">Enviar link de redefinição</button></div>
+<div id="resetBox" style="display:none"><input id="newPass" type="password" placeholder="Nova senha (mín. 8 caracteres)"><button onclick="sendReset()">Redefinir senha</button></div>
+<p id="msg"></p>
+</div>
+<script>
+let tab='login';
+const msg=(t,ok)=>{const m=document.getElementById('msg');m.textContent=t;m.style.color=ok?'#059669':'#dc2626';};
+function setTab(t){tab=t;document.getElementById('tabLogin').classList.toggle('active',t==='login');document.getElementById('tabReg').classList.toggle('active',t==='register');document.getElementById('regName').style.display=t==='register'?'block':'none';}
+async function submitAuth(){
+  const email=document.getElementById('email').value.trim(), password=document.getElementById('password').value;
+  try{
+    const r = tab==='register'
+      ? await PM_API.register(document.getElementById('name').value.trim(), email, password)
+      : await PM_API.login(email, password);
+    PM_API.token = r.token; msg('Bem-vindo(a), '+r.user.name+'! Redirecionando...', true);
+    setTimeout(()=>location.href='index.html', 600);
+  }catch(e){ msg(e.message); }
+}
+async function forgot(e){e.preventDefault();document.getElementById('forgotBox').style.display='block';}
+async function sendForgot(){
+  try{await PM_API.forgotPassword(document.getElementById('forgotEmail').value.trim());msg('Se o email existir, você receberá o link.', true);}
+  catch(e){msg(e.message);}
+}
+// Se veio do email: ?reset=TOKEN
+const resetToken=new URLSearchParams(location.search).get('reset');
+if(resetToken){document.getElementById('resetBox').style.display='block';}
+async function sendReset(){
+  try{await PM_API.resetPassword(resetToken, document.getElementById('newPass').value);msg('Senha redefinida! Faça login.', true);}
+  catch(e){msg(e.message);}
+}
+// Já logado? Vai direto para o dashboard
+if(PM_API.token){PM_API.me().then(()=>location.href='index.html').catch(()=>{});}
+</script></body></html>

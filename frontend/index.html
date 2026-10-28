@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Glassy PM — Dashboard do Gerente de Projeto</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,sans-serif;color:#fff;background:#0f1216 url('https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?q=80&w=2000&auto=format&fit=crop') center/cover fixed}
+body:before{content:"";position:fixed;inset:0;background:linear-gradient(180deg,rgba(10,12,18,.55),rgba(10,12,18,.78));z-index:0}
+a{color:#ffb86b}.app{position:relative;z-index:1;display:flex;min-height:100vh}
+.sidebar{width:248px;flex-shrink:0;margin:18px 0 18px 18px;padding:20px 16px;border-radius:24px;background:rgba(255,255,255,.09);backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,.18);position:sticky;top:18px;height:calc(100vh - 36px);overflow:auto}
+.logo{font-weight:800;font-size:20px;letter-spacing:-.5px}.logo span{color:#ff7a1a}.logo small{display:block;font-weight:500;color:rgba(255,255,255,.65);font-size:12px;margin-top:2px}
+.nav{margin-top:24px;display:grid;gap:6px}.nav button{border:0;text-align:left;padding:11px 13px;border-radius:13px;background:transparent;color:rgba(255,255,255,.82);font:600 14px Inter;cursor:pointer;display:flex;justify-content:space-between}
+.nav button.active,.nav button:hover{background:rgba(255,255,255,.16);color:#fff}
+.nav button i{font-style:normal;opacity:.7}.side-card{margin-top:22px;padding:14px;border-radius:16px;background:rgba(255,122,26,.18);border:1px solid rgba(255,255,255,.15)} .side-card b{font-size:13px}.side-card p{font-size:12px;color:rgba(255,255,255,.75);line-height:1.5}
+.main{flex:1;padding:18px 20px 30px;min-width:0}
+.top{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px}.top h1{margin:0;font-size:26px;letter-spacing:-.5px}.top p{margin:3px 0 0;color:rgba(255,255,255,.7);font-size:13px}
+.search{flex:1;min-width:220px;display:flex;gap:8px}.search input{flex:1;padding:12px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.1);color:#fff;outline:none}.search input::placeholder{color:rgba(255,255,255,.55)}
+.btn{border:0;border-radius:12px;padding:11px 16px;font-weight:700;cursor:pointer;background:#ff7a1a;color:#fff}.btn.ghost{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.18)}.btn.small{padding:7px 10px;font-size:12px;border-radius:9px}
+.grid{display:grid;gap:14px}.g4{grid-template-columns:repeat(4,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:1.6fr 1fr}
+.card{background:rgba(255,255,255,.09);backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,.16);border-radius:22px;padding:18px}
+.card h3{margin:0 0 4px;font-size:15px}.muted{color:rgba(255,255,255,.68);font-size:13px;line-height:1.55}.big{font-size:30px;font-weight:800;letter-spacing:-1px}.pill{display:inline-block;padding:4px 9px;border-radius:99px;font-size:11px;font-weight:700;background:rgba(255,255,255,.16)}
+.pill.green{background:rgba(52,211,153,.25)}.pill.orange{background:rgba(251,146,60,.28)}.pill.red{background:rgba(248,113,113,.28)}.pill.blue{background:rgba(96,165,250,.28)}
+.bar{height:8px;background:rgba(255,255,255,.16);border-radius:99px;overflow:hidden;margin:10px 0}.bar i{display:block;height:100%;background:linear-gradient(90deg,#ff7a1a,#ffb86b);border-radius:99px}
+input,select,textarea{width:100%;padding:11px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.28);color:#fff;font:500 14px Inter;outline:none} textarea{min-height:64px;resize:vertical} label{font-size:12px;font-weight:700;color:rgba(255,255,255,.75);display:block;margin:10px 0 5px}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}.view{display:none}.view.active{display:block}
+.task{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.10);margin-bottom:9px}.task.done{opacity:.6}.task.done b{text-decoration:line-through}
+.task input{width:18px;height:18px;accent-color:#ff7a1a;margin-top:2px}.task b{font-size:14px}.task p{margin:3px 0 0;font-size:12px;color:rgba(255,255,255,.65)}
+.chart{display:flex;align-items:flex-end;gap:10px;height:150px;padding-top:10px}.chart div{flex:1;text-align:center}.chart i{display:block;border-radius:10px 10px 4px 4px;background:linear-gradient(180deg,#ff7a1a,#ffb86b);margin:0 auto 6px;width:100%;max-width:44px}.chart span{font-size:11px;color:rgba(255,255,255,.65)}
+.gantt{overflow:auto}.gantt-row{display:grid;grid-template-columns:180px 1fr;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.08)}.gantt-track{position:relative;height:30px;background:rgba(255,255,255,.07);border-radius:9px}.gantt-bar{position:absolute;top:5px;height:20px;border-radius:7px;background:linear-gradient(90deg,#ff7a1a,#ffb86b);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;padding:0 8px;white-space:nowrap;overflow:hidden}
+.todayline{position:absolute;top:0;bottom:0;width:2px;background:#fff}
+.kbd{font-size:12px;background:rgba(255,255,255,.14);padding:3px 7px;border-radius:6px}
+@media(max-width:900px){.sidebar{display:none}.g4,.g3,.g2{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}.app{display:block}}
+.toast{position:fixed;right:20px;bottom:20px;background:#111827;border:1px solid rgba(255,255,255,.2);padding:13px 16px;border-radius:14px;z-index:50;display:none;max-width:360px}
+
+/* ===== V5 - igual ao video ===== */
+body{background:#0f1216 url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2400&auto=format&fit=crop') center/cover fixed}
+body:before{background:linear-gradient(180deg,rgba(10,12,18,.35),rgba(10,12,18,.62))}
+.sidebar{width:76px;flex-shrink:0;margin:16px 0 16px 16px;padding:16px 10px;border-radius:28px;background:rgba(10,12,18,.48);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.14);position:sticky;top:16px;height:calc(100vh - 32px);display:flex;flex-direction:column;align-items:center;gap:10px;overflow:visible}
+.avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#ff7a1a,#ffb86b);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;flex-shrink:0;border:2px solid rgba(255,255,255,.35)}
+.avatar.small{width:38px;height:38px;font-size:14px}
+#railNav{display:flex;flex-direction:column;gap:10px;align-items:center;margin-top:8px}
+#railNav button{width:48px;height:48px;border-radius:16px;padding:0;font-size:20px;display:flex;align-items:center;justify-content:center;position:relative;background:transparent}
+#railNav button.active,#railNav button:hover{background:rgba(255,255,255,.22);color:#fff}
+.railbadge{position:absolute;top:-4px;right:-4px;background:#ff7a1a;color:#fff;font-size:10px;font-weight:800;min-width:18px;height:18px;border-radius:99px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.main{padding:16px 20px 30px}
+.topbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.brand{font-weight:800;font-size:18px;letter-spacing:-.3px;white-space:nowrap}.brand b{color:#ff7a1a}
+.topnav{display:flex;gap:6px;background:rgba(10,12,18,.42);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:5px;margin:0 auto}
+.topnav button{border:0;background:transparent;color:rgba(255,255,255,.75);font:600 13px Inter;padding:8px 15px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.topnav button.active,.topnav button:hover{background:rgba(255,255,255,.20);color:#fff}
+.topactions{display:flex;gap:8px;align-items:center}
+.topactions input{width:190px;padding:10px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:rgba(10,12,18,.42);color:#fff;outline:none;font:500 13px Inter}
+.topactions input::placeholder{color:rgba(255,255,255,.55)}
+.card{background:rgba(16,19,26,.44);backdrop-filter:blur(22px) saturate(140%);border:1px solid rgba(255,255,255,.14);border-radius:20px;box-shadow:0 10px 34px rgba(0,0,0,.28)}
+.dash-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin:6px 0 16px}
+.dash-head h1{margin:0;font-size:28px;letter-spacing:-.6px}
+.stat-icon{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:10px;background:rgba(255,122,26,.22)}
+.chart{height:190px}
+.chart i{background:rgba(255,255,255,.28);border-radius:9px;max-width:52px}
+.chart i.todaybar{background:linear-gradient(180deg,#60a5fa,#3b82f6)}
+.goal-ring{width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;background:conic-gradient(#ffb86b 0%,rgba(255,255,255,.15) 0)}
+.goal-ring span{background:#14161c;width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px}
+@media(max-width:900px){.sidebar{width:100%;height:auto;position:static;flex-direction:row;border-radius:20px;flex-wrap:wrap}#railNav{flex-direction:row;margin-top:0}.topnav{margin:0;overflow:auto}.topactions input{width:140px}.g4,.g3,.g2{grid-template-columns:1fr}.app{display:block}}
+
+/* ===== V18 - style claro + movimentacoes ===== */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
+.view.active{animation:popIn .35s ease both}
+.view.active .card{animation:fadeUp .55s cubic-bezier(.22,1,.36,1) both}
+.view.active .card:nth-child(2){animation-delay:.06s}.view.active .card:nth-child(3){animation-delay:.12s}.view.active .card:nth-child(4){animation-delay:.18s}
+.card{transition:transform .25s ease,box-shadow .25s ease}
+.card:hover{transform:translateY(-5px);box-shadow:0 16px 40px rgba(0,0,0,.30)}
+.btn,#railNav button,.topnav button{transition:transform .2s ease,background .2s ease,box-shadow .2s ease}
+.btn:hover{transform:translateY(-2px)} .btn:active{transform:translateY(0) scale(.98)}
+#railNav button:hover{transform:scale(1.08)}
+.welcome-banner{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:18px 20px;border-radius:20px;margin-bottom:14px;background:linear-gradient(90deg,#ddd6fe,#fbcfe8);color:#111827;border:1px solid rgba(255,255,255,.5)}
+.welcome-banner b{font-size:18px}.welcome-banner p{margin:4px 0 0;color:#4b5563;font-size:13px}
+.welcome-banner .btn{background:#111827}
+/* Tema V18 claro - padrao */
+body[data-theme="v18"]{background-color:#f3f3f6;background-image:none;color:#111827}
+body[data-theme="v18"]:before{background:linear-gradient(180deg,rgba(243,243,246,.88),rgba(243,243,246,.95))}
+body[data-theme="v18"] .card{background:#fff;border:1px solid rgba(0,0,0,.06);box-shadow:0 6px 24px rgba(0,0,0,.06);backdrop-filter:none}
+body[data-theme="v18"] .card:hover{box-shadow:0 14px 32px rgba(0,0,0,.10)}
+body[data-theme="v18"] .muted{color:#6b7280}
+body[data-theme="v18"] .sidebar{background:#111827;border-color:transparent}
+body[data-theme="v18"] .topnav{background:#fff;border:1px solid rgba(0,0,0,.07);box-shadow:0 4px 16px rgba(0,0,0,.05)}
+body[data-theme="v18"] .topnav button{color:#374151}
+body[data-theme="v18"] .topnav button.active,body[data-theme="v18"] .topnav button:hover{background:#111827;color:#fff}
+body[data-theme="v18"] .topactions input{background:#fff;color:#111827;border:1px solid rgba(0,0,0,.09)}
+body[data-theme="v18"] input,body[data-theme="v18"] select,body[data-theme="v18"] textarea{background:#fff;color:#111827;border:1px solid #e5e7eb}
+body[data-theme="v18"] label{color:#4b5563}
+body[data-theme="v18"] .task{background:#f9fafb;border-color:#eef2f7}
+body[data-theme="v18"] .btn.ghost{background:#fff;color:#111827;border:1px solid #e5e7eb}
+body[data-theme="v18"] .gantt-track{background:#f3f4f6}
+body[data-theme="v18"] .toast{background:#fff;color:#111827}
+body[data-theme="v18"] .pill{background:#f3f4f6;color:#374151}
+body[data-theme="v18"] .pill.green{background:#d1fae5}body[data-theme="v18"] .pill.orange{background:#ffedd5}body[data-theme="v18"] .pill.red{background:#fee2e2}body[data-theme="v18"] .pill.blue{background:#dbeafe}
+body[data-theme="v18"] .goal-ring span{background:#fff}
+body[data-theme="v18"] .bar{background:#e5e7eb}
+body[data-theme="v18"][data-bg="1"]:before{background:linear-gradient(180deg,rgba(243,243,246,.60),rgba(243,243,246,.82))}
+body[data-theme="v5"] .welcome-banner{background:rgba(16,19,26,.44);backdrop-filter:blur(20px);color:#fff;border:1px solid rgba(255,255,255,.14)}
+body[data-theme="v5"] .welcome-banner p{color:rgba(255,255,255,.7)}
+body[data-theme="v5"] .welcome-banner .btn{background:#ff7a1a}
+
+/* Perfil + sidebar completa */
+.profile-avatar{width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,#ff7a1a,#ffb86b);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:36px;color:#fff;overflow:hidden;cursor:pointer;border:3px solid rgba(255,255,255,.6);flex-shrink:0}
+.profile-avatar img,.avatar img{width:100%;height:100%;object-fit:cover}
+.sidebar .avatar{cursor:pointer}
+#searchBar input{flex:1;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.25);color:#fff}
+body[data-theme="v18"] #searchBar input{background:#fff;color:#111827;border:1px solid #e5e7eb}
+.usercard{display:flex;gap:12px;align-items:center;padding:12px;border-radius:14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.10);margin-bottom:9px}
+body[data-theme="v18"] .usercard{background:#f9fafb;border-color:#eef2f7}
+
+/* Sidebar V18 - um unico jogo de icones SVG, sem duplicatas */
+.sidebar{width:74px;padding:14px 10px;gap:10px}
+#railNav{display:flex;flex-direction:column;gap:4px;align-items:center;margin-top:6px;width:100%}
+#railNav button{width:46px;height:46px;border-radius:14px;padding:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.55);background:transparent;position:relative;transition:all .2s ease}
+#railNav button svg{width:22px;height:22px;flex-shrink:0}
+#railNav button:hover{background:rgba(255,255,255,.14);color:#fff;transform:translateY(-1px)}
+#railNav button.active{background:#fff;color:#111827;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+#railNav button.active:hover{background:#fff}
+.railbadge{position:absolute;top:1px;right:1px;background:#ff7a1a;color:#fff;font-size:10px;font-weight:800;min-width:18px;height:18px;border-radius:99px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid #111827;line-height:1}
+.rail-divider{height:1px;width:60%;background:rgba(255,255,255,.16);margin:6px 0}
+.rail-utils{display:flex;flex-direction:column;gap:8px;align-items:center;margin-top:auto;width:100%}
+.rail-utils button{width:38px;height:38px;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.75);cursor:pointer;transition:all .2s ease;position:relative}
+.rail-utils button svg{width:18px;height:18px}
+.rail-utils button:hover{background:rgba(255,255,255,.18);color:#fff;transform:translateY(-1px)}
+#railNav button[data-tip]:hover:after,.rail-utils button[data-tip]:hover:after,.sidebar .avatar[data-tip]:hover:after{content:attr(data-tip);position:absolute;left:60px;top:50%;transform:translateY(-50%);background:#111827;color:#fff;padding:7px 11px;border-radius:9px;font-size:12px;font-weight:600;white-space:nowrap;z-index:99;box-shadow:0 6px 20px rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.15)}
+.sidebar .avatar{position:relative}
+.sidebar .avatar.active{box-shadow:0 0 0 3px rgba(255,255,255,.9)}
+</style></head>
+<body data-theme="v18"><script>if(!localStorage.getItem("glassy_token")){location.href="auth.html";}</script><div class="app">
+<aside class="sidebar"><div class="avatar" id="sideAvatar" data-view="perfil" data-tip="Meu perfil">N</div>
+<div class="nav" id="railNav">
+<button data-view="dashboard" class="active" data-tip="Início"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg></button>
+<button data-view="projetos" data-tip="Projetos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span id="countProj" class="railbadge">0</span></button>
+<button data-view="tarefas" data-tip="Tarefas do dia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="m8.5 12.5 2.5 2.5 5-6"/></svg></button>
+<button data-view="sprints" data-tip="Sprints"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V4"/><path d="M4 4h13l-2.5 5L17 14H4"/></svg></button>
+<button data-view="gantt" data-tip="Gantt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="10" height="4" rx="1.5"/><rect x="3" y="11" width="15" height="4" rx="1.5"/><rect x="3" y="17" width="7" height="4" rx="1.5"/></svg></button>
+<button data-view="lembretes" data-tip="Lembretes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M10.5 21a1.5 1.5 0 0 0 3 0"/></svg></button>
+<button data-view="equipe" data-tip="Equipe e riscos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.2 3-4.5 6.5-4.5S14.7 16.8 15.5 20"/><circle cx="17" cy="9" r="2.5"/><path d="M16.5 15.3c2.3.4 3.7 1.6 4.2 4.2"/></svg></button>
+</div>
+<div class="rail-divider"></div>
+<div class="rail-utils">
+<button data-tip="Buscar" onclick="toggleSearch(true)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+<button data-tip="Alternar tema V18 / V5" onclick="toggleTheme()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M18.4 18.4l-1.4-1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/></svg></button>
+<button data-tip="Subir imagem de fundo" onclick="document.getElementById('bgFile').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 20"/></svg></button>
+<button data-tip="Exportar backup" onclick="exportData()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 21h16"/></svg></button>
+<button data-tip="Importar backup" onclick="document.getElementById('importFile').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M4 21h16"/></svg></button>
+</div></aside>
+<main class="main">
+<div id="searchBar" class="card" style="display:none;margin-bottom:14px"><div style="display:flex;gap:8px"><input id="q" placeholder="🔍 Buscar projeto, tarefa ou lembrete..." oninput="renderAll()"><button class="btn ghost" onclick="toggleSearch(false)">Fechar</button></div></div><input type="file" id="importFile" accept=".json" hidden onchange="importData(event)"><input type="file" id="bgFile" accept="image/*" hidden onchange="uploadBg(event)">
+<!-- DASHBOARD -->
+<section id="view-dashboard" class="view active">
+<div class="welcome-banner"><div><b>Work's always better together 🤝</b><p>O trabalho rende mais junto. Veja seus projetos, tarefas de hoje e o progresso da equipe em um só lugar.</p></div><button class="btn small" onclick="showView('equipe')">+ Add member</button></div>
+<div class="dash-head"><div><h1 id="greeting">Boa noite, Nicholas</h1><p id="todayText" class="muted"></p></div><div style="display:flex;gap:10px;align-items:center"><div class="avatar small" id="dashAvatar" title="Meu perfil" onclick="showView('perfil')" style="cursor:pointer">N</div><button class="btn" onclick="showView('projetos')">+ Novo projeto</button></div></div>
+<div class="grid g4" id="stats"></div>
+<div class="grid" style="grid-template-columns:2fr 1fr;margin-top:14px;gap:14px">
+<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><h3>Productivity</h3><span class="pill green">▲ tarefas da semana</span></div><p class="muted">Tarefas por dia — a barra azul é hoje.</p><div class="chart" id="weekChart"></div></div>
+<div class="card"><h3>Today</h3><p class="muted">Lembretes e o que você tem que fazer hoje.</p><div id="dashReminders"></div><div id="todayTasks"></div><button class="btn ghost small" onclick="showView('tarefas')">Ver todas as tarefas</button></div>
+</div>
+<div class="grid g3" style="margin-top:14px">
+<div class="card"><h3>Recent activity</h3><div id="recentActivity"></div></div>
+<div class="card"><h3>Team</h3><div id="teamDash"></div><button class="btn ghost small" onclick="showView('equipe')">Ver equipe</button></div>
+<div class="card"><h3>Goals</h3><div style="display:flex;gap:14px;align-items:center"><div class="goal-ring" id="goalRing"><span id="goalPct">0%</span></div><div><b>Conclusão média</b><p class="muted">Média de progresso dos projetos.</p></div></div><div id="dashProjects" style="margin-top:12px"></div></div>
+</div>
+</section>
+
+<!-- PROJETOS -->
+<section id="view-projetos" class="view">
+<div class="card"><h3>➕ Cadastrar / editar projeto</h3>
+<div class="formgrid">
+<div><label>Nome do projeto *</label><input id="p_nome" placeholder="Ex: Lançamento do novo site"></div>
+<div><label>Cliente / Área</label><input id="p_cliente" placeholder="Ex: Marketing, Cliente X"></div>
+<div><label>Responsável</label><input id="p_resp" placeholder="Ex: Nicholas"></div>
+<div><label>Status</label><select id="p_status"><option>Planejamento</option><option selected>Em andamento</option><option>Em revisão</option><option>Pausado</option><option>Concluído</option><option>Cancelado</option></select></div>
+<div><label>Prioridade</label><select id="p_prior"><option>Alta</option><option selected>Média</option><option>Baixa</option></select></div>
+<div><label>Orçamento (R$)</label><input id="p_orc" type="number" placeholder="50000"></div>
+<div><label>Data de início *</label><input id="p_ini" type="date"></div>
+<div><label>Data de término *</label><input id="p_fim" type="date"></div>
+</div>
+<label>Descrição / Escopo</label><textarea id="p_desc" placeholder="Objetivo, entregáveis, escopo..."></textarea>
+<input type="hidden" id="p_id"><div style="margin-top:12px;display:flex;gap:8px"><button class="btn" onclick="saveProject()">Salvar projeto</button><button class="btn ghost" onclick="clearProjectForm()">Limpar</button></div>
+<p class="muted">Campos com * são obrigatórios. Ao salvar, o projeto já aparece no Gantt, no Dashboard e na lista de tarefas.</p></div>
+<div style="margin:14px 0;display:flex;gap:8px;flex-wrap:wrap"><select id="f_status" onchange="renderAll()" style="max-width:220px"><option value="">Todos os status</option><option>Planejamento</option><option>Em andamento</option><option>Em revisão</option><option>Pausado</option><option>Concluído</option></select><select id="f_prior" onchange="renderAll()" style="max-width:220px"><option value="">Todas as prioridades</option><option>Alta</option><option>Média</option><option>Baixa</option></select></div>
+<div class="grid g3" id="projectList"></div>
+</section>
+
+<!-- TAREFAS -->
+<section id="view-tarefas" class="view">
+<div class="card"><h3>➕ Nova tarefa diária</h3><div class="formgrid">
+<div><label>Tarefa *</label><input id="t_titulo" placeholder="Ex: Revisar escopo com o cliente"></div>
+<div><label>Projeto</label><select id="t_proj"></select></div>
+<div><label>Vencimento</label><input id="t_data" type="date"></div>
+<div><label>Prioridade</label><select id="t_prior"><option>Alta</option><option selected>Média</option><option>Baixa</option></select></div>
+<div><label>Sprint</label><select id="t_sprint"><option value="">Sem sprint</option></select></div>
+<div><label>Status</label><select id="t_status"><option value="todo">A fazer</option><option value="doing">Em andamento</option><option value="done">Concluída</option></select></div>
+</div><div style="margin-top:12px"><button class="btn" onclick="saveTask()">Adicionar tarefa</button></div></div>
+<div class="grid g3" style="margin-top:14px">
+<div class="card"><h3>🔴 Hoje / Atrasadas</h3><div id="tasksToday"></div></div>
+<div class="card"><h3>🟡 Próximas</h3><div id="tasksNext"></div></div>
+<div class="card"><h3>🟢 Concluídas</h3><div id="tasksDone"></div></div>
+</div></section>
+
+<!-- SPRINTS -->
+<section id="view-sprints" class="view">
+<div class="card"><h3>🚀 Criar sprint</h3><div class="formgrid">
+<div><label>Nome da sprint *</label><input id="s_nome" placeholder="Ex: Sprint 13"></div>
+<div><label>Projeto</label><select id="s_proj"></select></div>
+<div><label>Início</label><input id="s_ini" type="date"></div>
+<div><label>Fim</label><input id="s_fim" type="date"></div>
+</div><label>Meta da sprint</label><textarea id="s_meta" placeholder="O que deve ser entregue ao final?"></textarea>
+<div style="margin-top:12px"><button class="btn" onclick="saveSprint()">Criar sprint</button></div></div>
+<div style="margin-top:14px"><label>Ver sprint</label><select id="s_filter" onchange="renderSprints()"></select></div>
+<div class="grid g3" style="margin-top:12px">
+<div class="card"><h3>📋 A fazer</h3><div id="boardTodo" class="kanban-column" data-status="todo"></div></div>
+<div class="card"><h3>🔄 Em andamento</h3><div id="boardDoing" class="kanban-column" data-status="doing"></div></div>
+<div class="card"><h3>✅ Concluída</h3><div id="boardDone" class="kanban-column" data-status="done"></div></div>
+</div>
+<div class="card" style="margin-top:14px"><h3>📉 Progresso da sprint selecionada</h3><div id="sprintProgress"></div></div>
+</section>
+
+<!-- GANTT -->
+<section id="view-gantt" class="view">
+<div class="card"><h3>📊 Gantt dos projetos</h3><p class="muted">Linha branca = hoje. As barras usam início e término cadastrados no projeto. Edite as datas em Projetos para mover a barra.</p><div id="ganttMonths" class="muted" style="margin:10px 0"></div><div class="gantt" id="gantt"></div></div>
+<div class="card" style="margin-top:14px"><h3>🗓️ Linha do tempo das tarefas</h3><div class="gantt" id="ganttTasks"></div></div>
+</section>
+
+<!-- LEMBRETES -->
+<section id="view-lembretes" class="view">
+<div class="card"><h3>🔔 Novo lembrete</h3><div class="formgrid">
+<div><label>Lembrete *</label><input id="r_titulo" placeholder="Ex: Daily com a equipe às 9h"></div>
+<div><label>Tipo</label><select id="r_tipo"><option>Reunião</option><option>Entrega</option><option>Follow-up</option><option>Pessoal</option><option>Pagamento</option></select></div>
+<div><label>Data</label><input id="r_data" type="date"></div>
+<div><label>Hora</label><input id="r_hora" type="time" value="09:00"></div>
+</div><div style="margin-top:12px"><button class="btn" onclick="saveReminder()">Salvar lembrete</button></div></div>
+<div class="card" style="margin-top:14px"><h3>Meus lembretes</h3><div id="reminderList"></div></div>
+</section>
+
+<!-- EQUIPE -->
+<section id="view-equipe" class="view">
+<div class="grid g2">
+<div class="card"><h3>👥 Equipe</h3><p class="muted">Cadastre quem participa dos projetos. Use o nome no campo Responsável do projeto.</p><div id="teamList"></div><div class="formgrid"><div><label>Nome</label><input id="e_nome" placeholder="Ex: Ana Souza"></div><div><label>Função</label><input id="e_funcao" placeholder="Ex: Designer"></div></div><button class="btn" style="margin-top:12px" onclick="addMember()">Adicionar pessoa</button></div>
+<div class="card"><h3>⚠️ Riscos & Impedimentos</h3><p class="muted">Registre riscos do gerente de projeto: o que pode atrasar, impacto e ação.</p><div id="riskList"></div><div><label>Risco</label><input id="k_texto" placeholder="Ex: Cliente pode atrasar aprovação"><label>Ação de mitigação</label><input id="k_acao" placeholder="Ex: Enviar prévia 3 dias antes"></div><button class="btn" style="margin-top:12px" onclick="addRisk()">Registrar risco</button></div>
+</div>
+<div class="card" style="margin-top:14px"><h3>📝 Atas, decisões e lições aprendidas</h3><p class="muted">Anote decisões importantes para não perder o contexto do projeto.</p><textarea id="notes" placeholder="Ex: 28/10 - Decidido: escopo da fase 1 inclui apenas..."></textarea><button class="btn" style="margin-top:10px" onclick="saveNotes()">Salvar anotações</button></div>
+</section>
+
+
+<!-- PERFIL -->
+<section id="view-perfil" class="view">
+<div class="card"><div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap"><div class="profile-avatar" id="pf_avatarPreview" onclick="document.getElementById('pf_avatarFile').click()" title="Clique para trocar a foto">N</div><div><h3 style="font-size:20px" id="pf_title">Meu perfil</h3><p class="muted">Clique na foto para trocar. Seus dados ficam salvos só na sua máquina.</p><button class="btn ghost small" onclick="document.getElementById('pf_avatarFile').click()">📷 Trocar foto</button><input type="file" id="pf_avatarFile" accept="image/*" hidden onchange="uploadAvatar(event)"></div></div>
+<div class="formgrid">
+<div><label>Nome *</label><input id="pf_nome" placeholder="Seu nome"></div>
+<div><label>Email *</label><input id="pf_email" type="email" placeholder="voce@email.com"></div>
+<div><label>Cargo / Função</label><input id="pf_cargo" placeholder="Ex: Gerente de Projeto"></div>
+<div><label>Telefone</label><input id="pf_telefone" placeholder="(00) 00000-0000"></div>
+</div><label>Bio</label><textarea id="pf_bio" placeholder="Fale um pouco sobre você..."></textarea>
+<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="saveProfile()">Salvar meus dados</button></div></div>
+
+<div class="grid g2" style="margin-top:14px">
+<div class="card"><h3>🔒 Trocar senha</h3><p class="muted">A senha fica guardada só como código (hash) neste navegador, não em texto.</p>
+<label>Senha atual (se você já tem uma)</label><input id="pf_atual" type="password">
+<label>Nova senha</label><input id="pf_nova" type="password">
+<label>Confirmar nova senha</label><input id="pf_conf" type="password">
+<button class="btn" style="margin-top:12px" onclick="changePassword()">Alterar senha</button></div>
+<div class="card"><h3>🖼️ Imagem de fundo & Style</h3><p class="muted">O fundo também pode ser trocado aqui, além do botão 🖼️ na sidebar.</p>
+<label>Style do sistema</label><select id="themeSel" onchange="setTheme(this.value)"><option value="v18">🎨 V18 Claro</option><option value="v5">🌙 V5 Glassy</option></select>
+<p class="muted" id="bgStatus" style="margin-top:10px">Fundo atual: padrão do tema.</p>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="document.getElementById('bgFile').click()">Subir imagem de fundo</button><button class="btn ghost" onclick="removeBg()">Remover fundo</button></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn ghost" onclick="exportData()">⬇ Exportar backup</button><button class="btn ghost" onclick="document.getElementById('importFile').click()">⬆ Importar backup</button></div></div>
+</div>
+
+<div class="card" style="margin-top:14px"><h3>👥 Cadastro de usuário — cada usuário tem seus próprios projetos</h3><p class="muted">Crie uma conta para outra pessoa. Ao trocar de usuário, o dashboard, projetos, tarefas, sprints e lembretes mudam para os dela. Nada se mistura.</p>
+<div id="pf_userList"></div>
+<div class="formgrid">
+<div><label>Nome do novo usuário *</label><input id="nu_nome" placeholder="Ex: Ana Souza"></div>
+<div><label>Email *</label><input id="nu_email" type="email" placeholder="ana@email.com"></div>
+<div><label>Senha (opcional)</label><input id="nu_senha" type="password" placeholder="Se deixar vazio, entra sem senha"></div>
+<div><label>Cargo</label><input id="nu_cargo" placeholder="Ex: Analista"></div>
+</div><button class="btn" style="margin-top:12px" onclick="createUserFromProfile()">Cadastrar usuário e entrar com ele</button></div>
+</section>
+
+</main></div><div class="toast" id="toast"></div>
+<script src="api-client.js"></script><script src="kanban.js"></script>
+<script>
+const KEY='glassy_pm_v1';
+const todayISO=()=>{const d=new Date();return d.toISOString().slice(0,10)};
+const addDays=(n)=>{const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
+const fmt=(s)=>{if(!s)return '-';const [y,m,d]=s.split('-');return d+'/'+m+'/'+y};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+function seed(){
+ return {projects:[
+  {id:uid(),nome:'Lançamento do Novo Site',cliente:'Marketing',resp:'Nicholas',status:'Em andamento',prior:'Alta',orc:45000,ini:addDays(-12),fim:addDays(18),desc:'Redesign completo, novas páginas de produto e otimização para conversão.',progress:62},
+  {id:uid(),nome:'App Mobile V2',cliente:'Produto',resp:'Nicholas',status:'Em andamento',prior:'Alta',orc:80000,ini:addDays(-5),fim:addDays(35),desc:'Login social, notificações e novo fluxo de checkout.',progress:34},
+  {id:uid(),nome:'Migração para a Nuvem',cliente:'TI',resp:'Nicholas',status:'Planejamento',prior:'Média',orc:30000,ini:addDays(10),fim:addDays(60),desc:'Migrar servidores, backups e monitoramento.',progress:10}],
+ tasks:[
+  {id:uid(),titulo:'Revisar escopo com o cliente',proj:'',data:todayISO(),prior:'Alta',status:'todo',sprint:''},
+  {id:uid(),titulo:'Daily com a equipe (15 min)',proj:'',data:todayISO(),prior:'Média',status:'todo',sprint:''},
+  {id:uid(),titulo:'Aprovar layout da home',proj:'',data:todayISO(),prior:'Alta',status:'doing',sprint:''},
+  {id:uid(),titulo:'Atualizar status dos projetos atrasados',proj:'',data:addDays(1),prior:'Média',status:'todo',sprint:''},
+  {id:uid(),titulo:'Enviar relatório semanal ao cliente',proj:'',data:addDays(2),prior:'Média',status:'todo',sprint:''},
+  {id:uid(),titulo:'Planejar próxima sprint',proj:'',data:addDays(3),prior:'Baixa',status:'todo',sprint:''}],
+ sprints:[{id:uid(),nome:'Sprint 12',proj:'',ini:addDays(-6),fim:addDays(8),meta:'Entregar home nova e fluxo de checkout.'}],
+ reminders:[
+  {id:uid(),titulo:'Daily com a equipe',tipo:'Reunião',data:todayISO(),hora:'09:00',done:false},
+  {id:uid(),titulo:'Entrega da prévia ao cliente',tipo:'Entrega',data:addDays(2),hora:'17:00',done:false},
+  {id:uid(),titulo:'Reunião de planejamento da sprint',tipo:'Reunião',data:addDays(8),hora:'10:00',done:false}],
+ team:[{nome:'Ana Souza',funcao:'Designer'},{nome:'Carlos Lima',funcao:'Desenvolvedor'},{nome:'Julia Mendes',funcao:'QA'}],
+ risks:[{texto:'Cliente pode atrasar aprovação do layout',acao:'Enviar prévia 3 dias antes e agendar revisão'}],
+ notes:''};
+}
+const USERS_KEY='pm_users_v1', CUR_KEY='pm_current_v1', DATA_KEY='pm_data_v1';
+let users; try{users=JSON.parse(localStorage.getItem(USERS_KEY))}catch(e){users=null}
+let dbByUser; try{dbByUser=JSON.parse(localStorage.getItem(DATA_KEY))||{}}catch(e){dbByUser={}}
+let currentUserId=localStorage.getItem(CUR_KEY);
+if(!users||!users.length){
+  let old=null; try{old=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+  const nid='u_'+Date.now().toString(36);
+  users=[{id:nid,nome:'Nicholas',email:'',cargo:'Gerente de Projeto',telefone:'',bio:'',avatar:'',senhaHash:''}];
+  currentUserId=nid;
+  if(old&&old.projects) dbByUser[nid]=old;
+  try{localStorage.setItem(USERS_KEY,JSON.stringify(users));localStorage.setItem(CUR_KEY,nid);localStorage.setItem(DATA_KEY,JSON.stringify(dbByUser));}catch(e){}
+}
+if(!dbByUser[currentUserId]) dbByUser[currentUserId]=seed();
+let db=dbByUser[currentUserId];
+if(!db.projects) db=seed();
+function currentUser(){return users.find(u=>u.id===currentUserId)||users[0]}
+function saveUsers(){try{localStorage.setItem(USERS_KEY,JSON.stringify(users))}catch(e){}}
+function save(){dbByUser[currentUserId]=db;try{localStorage.setItem(DATA_KEY,JSON.stringify(dbByUser));localStorage.setItem(KEY,JSON.stringify(db));}catch(e){}}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2800);}
+function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===v));renderAll();window.scrollTo({top:0,behavior:'smooth'});}
+document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>showView(b.dataset.view));
+function esc(s){return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function projName(id){const p=db.projects.find(x=>x.id===id);return p?p.nome:'Sem projeto'}
+function statusPill(s){const m={'Concluído':'green','Em andamento':'orange','Em revisão':'blue','Pausado':'red','Planejamento':'','Cancelado':'red'};return `<span class="pill ${m[s]||''}">${esc(s)}</span>`}
+function filteredTasks(){const q=(document.getElementById('q').value||'').toLowerCase();return db.tasks.filter(t=>!q||t.titulo.toLowerCase().includes(q)||projName(t.proj).toLowerCase().includes(q))}
+function renderAll(){renderProfile();updateAvatars();renderDashboard();renderProjects();renderTasks();renderSprints();renderReminders();renderTeam();document.getElementById('countProj').textContent=db.projects.length;document.getElementById('todayText').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' • '+db.projects.filter(p=>p.status==='Em andamento').length+' projetos em andamento';const h=new Date().getHours();document.getElementById('greeting').textContent=(h<12?'Bom dia':h<18?'Boa tarde':'Boa noite')+', '+(currentUser().nome.split(' ')[0]||'Nicholas')+' 👋';}
+function renderDashboard(){
+ const tasks=filteredTasks();const today=todayISO();
+ const active=db.projects.filter(p=>p.status==='Em andamento').length;
+ const todayTasks=tasks.filter(t=>t.data===today&&t.status!=='done').length;
+ const done=tasks.filter(t=>t.status==='done').length;
+ const late=tasks.filter(t=>t.data<today&&t.status!=='done').length;
+ const prog=db.projects.length?Math.round(db.projects.reduce((a,p)=>a+(p.progress||0),0)/db.projects.length):0;
+ const totalOrc=db.projects.reduce((a,p)=>a+(p.orc||0),0);
+ const spark='<svg width="100" height="22" viewBox="0 0 100 22" fill="none"><polyline points="0,16 20,11 40,14 60,7 80,10 100,3" stroke="#34d399" stroke-width="2" stroke-linecap="round"/></svg>';
+ document.getElementById('stats').innerHTML=[
+  ['📁','Active Projects',active,'projetos em andamento'],['💰','Orçamento total','R$ '+(totalOrc>=1000?Math.round(totalOrc/1000)+'k':totalOrc),'somando os projetos'],['✅','Tarefas de hoje',todayTasks,late?late+' atrasada(s)':'nenhuma atrasada'],['📈','Conclusão média',prog+'%','média dos projetos']].map(x=>`<div class="card"><div class="stat-icon">${x[0]}</div><p class="muted" style="margin:0">${x[1]}</p><div class="big">${x[2]}</div><p class="muted" style="margin:2px 0 8px">${x[3]}</p>${spark}</div>`).join('');
+ // week chart: done per weekday last 7 days simplified by task dates
+ const days=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];let chart='';
+ for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const iso=d.toISOString().slice(0,10);const n=tasks.filter(t=>t.data===iso).length;chart+=`<div><i class="${iso===today?'todaybar':''}" style="height:${20+n*28}px"></i><span>${days[d.getDay()]}<br>${n} tarefa(s)</span></div>`;}
+ document.getElementById('weekChart').innerHTML=chart;
+ document.getElementById('dashReminders').innerHTML=db.reminders.filter(r=>!r.done).slice(0,4).map(r=>`<div class="task"><span>🔔</span><div><b>${esc(r.titulo)}</b><p>${r.tipo} • ${fmt(r.data)} às ${r.hora}</p></div></div>`).join('')||'<p class="muted">Nenhum lembrete pendente. 🎉</p>';
+ const todays=tasks.filter(t=>(t.data===today||t.data<today)&&t.status!=='done').slice(0,6);
+ document.getElementById('todayTasks').innerHTML=todays.map(t=>`<div class="task"><input type="checkbox" onchange="toggleTask('${t.id}')"><div><b>${esc(t.titulo)}</b><p>${projName(t.proj)} • ${fmt(t.data)} • ${t.prior}</p></div></div>`).join('')||'<p class="muted">Nada para hoje. Aproveite para planejar a próxima sprint.</p>';
+ document.getElementById('recentActivity').innerHTML=db.tasks.slice(0,4).map(x=>`<div class="task"><div><b>${esc(x.titulo)}</b><p>${projName(x.proj)} • ${fmt(x.data)} • ${x.status==='done'?'Concluída':'Pendente'}</p></div></div>`).join('')||'<p class="muted">Sem atividade ainda.</p>';
+ document.getElementById('teamDash').innerHTML=db.team.map(m=>`<div class="task"><div class="avatar small" style="width:32px;height:32px;font-size:12px">${esc(m.nome[0]||'')}</div><div><b>${esc(m.nome)}</b><p>${esc(m.funcao)}</p></div></div>`).join('')||'<p class="muted">Sem equipe cadastrada.</p>';
+ document.getElementById('goalPct').textContent=prog+'%';document.getElementById('goalRing').style.background=`conic-gradient(#ffb86b ${prog}%, rgba(255,255,255,.15) 0)`;
+ document.getElementById('dashProjects').innerHTML=db.projects.slice(0,4).map(p=>`<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;gap:8px"><b>${esc(p.nome)}</b>${statusPill(p.status)}</div><p class="muted" style="margin:4px 0">${esc(p.cliente||'')} • ${fmt(p.ini)} → ${fmt(p.fim)}</p><div class="bar"><i style="width:${p.progress}%"></i></div><span class="muted">${p.progress}% concluído</span></div>`).join('');
+}
+function renderProjects(){
+ const fs=document.getElementById('f_status').value, fp=document.getElementById('f_prior').value, q=(document.getElementById('q').value||'').toLowerCase();
+ const list=db.projects.filter(p=>(!fs||p.status===fs)&&(!fp||p.prior===fp)&&(!q||p.nome.toLowerCase().includes(q)));
+ document.getElementById('projectList').innerHTML=list.map(p=>`<div class="card"><div style="display:flex;justify-content:space-between">${statusPill(p.status)}<span class="pill">${esc(p.prior)}</span></div><h3 style="margin-top:10px">${esc(p.nome)}</h3><p class="muted">${esc(p.desc||'Sem descrição')}</p><p class="muted">👤 ${esc(p.resp||'-')} • 🏢 ${esc(p.cliente||'-')}<br>📅 ${fmt(p.ini)} → ${fmt(p.fim)}<br>💰 R$ ${(p.orc||0).toLocaleString('pt-BR')}</p><div class="bar"><i style="width:${p.progress}%"></i></div><label>Progresso: ${p.progress}%</label><input type="range" min="0" max="100" value="${p.progress}" onchange="setProgress('${p.id}',this.value)"><div style="display:flex;gap:6px;margin-top:10px"><button class="btn ghost small" onclick="editProject('${p.id}')">Editar</button><button class="btn ghost small" onclick="delProject('${p.id}')">Excluir</button><button class="btn ghost small" onclick="filterByProject('${p.id}')">Ver tarefas</button></div></div>`).join('')||'<p class="muted">Nenhum projeto com esse filtro. Cadastre o primeiro acima.</p>';
+ // selects
+ const opts='<option value="">Sem projeto</option>'+db.projects.map(p=>`<option value="${p.id}">${esc(p.nome)}</option>`).join('');
+ document.getElementById('t_proj').innerHTML=opts;document.getElementById('s_proj').innerHTML=opts;
+}
+function clearProjectForm(){['p_nome','p_cliente','p_resp','p_desc'].forEach(id=>document.getElementById(id).value='');document.getElementById('p_id').value='';document.getElementById('p_orc').value='';}
+function saveProject(){const nome=document.getElementById('p_nome').value.trim();const ini=document.getElementById('p_ini').value;const fim=document.getElementById('p_fim').value;if(!nome||!ini||!fim){alert('Preencha nome, início e término.');return;}const id=document.getElementById('p_id').value;const obj={id:id||uid(),nome,cliente:document.getElementById('p_cliente').value,resp:document.getElementById('p_resp').value,status:document.getElementById('p_status').value,prior:document.getElementById('p_prior').value,orc:Number(document.getElementById('p_orc').value||0),ini,fim,desc:document.getElementById('p_desc').value,progress:id?(db.projects.find(p=>p.id===id)||{}).progress||0:0};if(id){db.projects=db.projects.map(p=>p.id===id?obj:p)}else db.projects.unshift(obj);save();clearProjectForm();toast('Projeto salvo! ✅');renderAll();}
+function editProject(id){const p=db.projects.find(x=>x.id===id);if(!p)return;document.getElementById('p_id').value=p.id;document.getElementById('p_nome').value=p.nome;document.getElementById('p_cliente').value=p.cliente;document.getElementById('p_resp').value=p.resp;document.getElementById('p_status').value=p.status;document.getElementById('p_prior').value=p.prior;document.getElementById('p_orc').value=p.orc;document.getElementById('p_ini').value=p.ini;document.getElementById('p_fim').value=p.fim;document.getElementById('p_desc').value=p.desc;window.scrollTo({top:0,behavior:'smooth'});}
+function delProject(id){if(!confirm('Excluir este projeto? As tarefas vinculadas ficarão sem projeto.'))return;db.projects=db.projects.filter(p=>p.id!==id);save();renderAll();}
+function setProgress(id,v){const p=db.projects.find(x=>x.id===id);p.progress=Number(v);if(v==100)p.status='Concluído';save();renderAll();}
+function filterByProject(id){showView('tarefas');document.getElementById('q').value=db.projects.find(p=>p.id===id)?.nome||'';renderAll();}
+function taskHTML(t){return `<div class="task ${t.status==='done'?'done':''}"><input type="checkbox" ${t.status==='done'?'checked':''} onchange="toggleTask('${t.id}')"><div style="flex:1"><b>${esc(t.titulo)}</b><p>${projName(t.proj)} • ${fmt(t.data)} • ${t.prior} • ${t.status==='todo'?'A fazer':t.status==='doing'?'Em andamento':'Concluída'}</p></div><button class="btn ghost small" onclick="delTask('${t.id}')">✕</button></div>`}
+function renderTasks(){
+ const tasks=filteredTasks();const today=todayISO();
+ document.getElementById('tasksToday').innerHTML=tasks.filter(t=>t.data<=today&&t.status!=='done').map(taskHTML).join('')||'<p class="muted">Nenhuma tarefa para hoje.</p>';
+ document.getElementById('tasksNext').innerHTML=tasks.filter(t=>t.data>today&&t.status!=='done').map(taskHTML).join('')||'<p class="muted">Nenhuma tarefa futura.</p>';
+ document.getElementById('tasksDone').innerHTML=tasks.filter(t=>t.status==='done').map(taskHTML).join('')||'<p class="muted">Nenhuma concluída ainda.</p>';
+ document.getElementById('t_sprint').innerHTML='<option value="">Sem sprint</option>'+db.sprints.map(s=>`<option value="${s.id}">${esc(s.nome)}</option>`).join('');
+ document.getElementById('t_data').value=document.getElementById('t_data').value||today;
+}
+function saveTask(){const titulo=document.getElementById('t_titulo').value.trim();if(!titulo){alert('Digite a tarefa.');return;}db.tasks.unshift({id:uid(),titulo,proj:document.getElementById('t_proj').value,data:document.getElementById('t_data').value||todayISO(),prior:document.getElementById('t_prior').value,status:document.getElementById('t_status').value,sprint:document.getElementById('t_sprint').value});document.getElementById('t_titulo').value='';save();toast('Tarefa adicionada!');renderAll();}
+function toggleTask(id){const t=db.tasks.find(x=>x.id===id);t.status=t.status==='done'?'todo':'done';save();renderAll();}
+function delTask(id){db.tasks=db.tasks.filter(t=>t.id!==id);save();renderAll();}
+function renderSprints(){
+ document.getElementById('s_filter').innerHTML=db.sprints.map(s=>`<option value="${s.id}">${esc(s.nome)} — ${fmt(s.ini)} a ${fmt(s.fim)}</option>`).join('');
+ const sid=document.getElementById('s_filter').value||(db.sprints[0]&&db.sprints[0].id);if(!sid)return;
+ const tasks=db.tasks.filter(t=>t.sprint===sid);
+ const col=(st,el)=>{document.getElementById(el).innerHTML=tasks.filter(t=>t.status===st).map(t=>`<div class="task kanban-card" draggable="true" data-task-id="${t.id}"><div style="flex:1"><b>${esc(t.titulo)}</b><p>${fmt(t.data)} • ${t.prior}</p></div><select style="width:auto;padding:6px" onchange="moveTask('${t.id}',this.value)"><option value="todo" ${t.status==='todo'?'selected':''}>A fazer</option><option value="doing" ${t.status==='doing'?'selected':''}>Fazendo</option><option value="done" ${t.status==='done'?'selected':''}>Feito</option></select></div>`).join('')||'<p class="muted">Nenhuma aqui.</p>'};
+ col('todo','boardTodo');col('doing','boardDoing');col('done','boardDone'); if(window.initKanban){try{initKanban();}catch(e){}}
+ const total=tasks.length||1,done=tasks.filter(t=>t.status==='done').length;const sp=db.sprints.find(s=>s.id===sid);
+ document.getElementById('sprintProgress').innerHTML=`<b>${esc(sp.nome)}</b><p class="muted">${esc(sp.meta||'')} • ${fmt(sp.ini)} → ${fmt(sp.fim)}</p><div class="bar"><i style="width:${Math.round(done/total*100)}%"></i></div>${done}/${tasks.length} tarefas concluídas (${Math.round(done/total*100)}%)`;
+ // gantt
+ renderGantt();
+}
+function moveTask(id,st){const t=db.tasks.find(x=>x.id===id);t.status=st;save();renderAll();}
+function saveSprint(){const nome=document.getElementById('s_nome').value.trim();if(!nome){alert('Digite o nome da sprint.');return;}db.sprints.unshift({id:uid(),nome,proj:document.getElementById('s_proj').value,ini:document.getElementById('s_ini').value||todayISO(),fim:document.getElementById('s_fim').value||addDays(14),meta:document.getElementById('s_meta').value});save();toast('Sprint criada!');renderAll();}
+function renderGantt(){
+ if(!db.projects.length){document.getElementById('gantt').innerHTML='<p class="muted">Cadastre um projeto para ver o Gantt.</p>';return;}
+ const allDates=db.projects.flatMap(p=>[p.ini,p.fim]).filter(Boolean).sort();const min=new Date(allDates[0]);const max=new Date(allDates[allDates.length-1]);max.setDate(max.getDate()+7);const total=Math.max(1,(max-min)/86400000);
+ const pos=(d)=>{const x=(new Date(d)-min)/86400000/total*100;return Math.max(0,Math.min(100,x))};
+ const wid=(a,b)=>Math.max(4,pos(b)-pos(a));
+ const todayPos=pos(todayISO());
+ document.getElementById('ganttMonths').textContent=`Período: ${fmt(allDates[0])} → ${fmt(allDates[allDates.length-1])} • Hoje: ${fmt(todayISO())}`;
+ document.getElementById('gantt').innerHTML=db.projects.map(p=>`<div class="gantt-row"><div><b style="font-size:13px">${esc(p.nome)}</b><br><span class="muted" style="font-size:12px">${fmt(p.ini)} → ${fmt(p.fim)}</span></div><div class="gantt-track"><div class="gantt-bar" style="left:${pos(p.ini)}%;width:${wid(p.ini,p.fim)}%">${p.progress}%</div><div class="todayline" style="left:${todayPos}%"></div></div></div>`).join('');
+ document.getElementById('ganttTasks').innerHTML=db.tasks.slice(0,12).map(t=>`<div class="gantt-row"><div><b style="font-size:13px">${esc(t.titulo)}</b><br><span class="muted" style="font-size:12px">${fmt(t.data)}</span></div><div class="gantt-track"><div class="gantt-bar" style="left:${pos(t.data)}%;width:4%;background:#60a5fa"></div><div class="todayline" style="left:${todayPos}%"></div></div></div>`).join('');
+}
+function renderReminders(){
+ document.getElementById('reminderList').innerHTML=[...db.reminders].sort((a,b)=>a.data.localeCompare(b.data)).map(r=>`<div class="task ${r.done?'done':''}"><input type="checkbox" ${r.done?'checked':''} onchange="toggleReminder('${r.id}')"><div style="flex:1"><b>${esc(r.titulo)}</b><p>${r.tipo} • ${fmt(r.data)} às ${r.hora}</p></div><button class="btn ghost small" onclick="delReminder('${r.id}')">✕</button></div>`).join('')||'<p class="muted">Nenhum lembrete.</p>';
+}
+function saveReminder(){const titulo=document.getElementById('r_titulo').value.trim();if(!titulo){alert('Digite o lembrete.');return;}db.reminders.unshift({id:uid(),titulo,tipo:document.getElementById('r_tipo').value,data:document.getElementById('r_data').value||todayISO(),hora:document.getElementById('r_hora').value,done:false});save();toast('Lembrete salvo!');renderAll();}
+function toggleReminder(id){const r=db.reminders.find(x=>x.id===id);r.done=!r.done;save();renderAll();}
+function delReminder(id){db.reminders=db.reminders.filter(r=>r.id!==id);save();renderAll();}
+function renderTeam(){
+ document.getElementById('teamList').innerHTML=db.team.map((m,i)=>`<div class="task"><div><b>${esc(m.nome)}</b><p>${esc(m.funcao)}</p></div></div>`).join('');
+ document.getElementById('riskList').innerHTML=db.risks.map((r,i)=>`<div class="task"><div><b>⚠️ ${esc(r.texto)}</b><p>Ação: ${esc(r.acao)}</p></div></div>`).join('');
+ document.getElementById('notes').value=db.notes||'';
+}
+function addMember(){const n=document.getElementById('e_nome').value.trim();if(!n)return;db.team.push({nome:n,funcao:document.getElementById('e_funcao').value});save();renderAll();}
+function addRisk(){const t=document.getElementById('k_texto').value.trim();if(!t)return;db.risks.push({texto:t,acao:document.getElementById('k_acao').value});save();renderAll();}
+function saveNotes(){db.notes=document.getElementById('notes').value;save();toast('Anotações salvas!');}
+function exportData(){const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='backup-glassy-pm-'+todayISO()+'.json';a.click();toast('Backup exportado!');}
+function importData(ev){const f=ev.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{db=JSON.parse(rd.result);save();renderAll();toast('Backup importado!')}catch(e){alert('Arquivo inválido.')}};rd.readAsText(f);}
+
+function setTheme(v){document.body.dataset.theme=v;try{localStorage.setItem('pm_theme',v)}catch(e){}const s=document.getElementById('themeSel');if(s)s.value=v;toast(v==='v18'?'Style V18 Claro aplicado ✨':'Style V5 Glassy aplicado 🌙');}
+function applyBg(){try{const bg=localStorage.getItem('pm_bg');if(bg){document.body.dataset.bg='1';document.body.style.backgroundImage='url('+bg+')';document.body.style.backgroundSize='cover';document.body.style.backgroundPosition='center';document.body.style.backgroundAttachment='fixed';}}catch(e){}}
+function removeBg(){try{localStorage.removeItem('pm_bg')}catch(e){}delete document.body.dataset.bg;document.body.style.backgroundImage='';toast('Fundo removido. Voltou ao padrão do tema.');}
+function uploadBg(ev){const f=ev.target.files[0];if(!f)return;const img=new Image();const url=URL.createObjectURL(f);img.onload=()=>{const maxW=1600;const scale=Math.min(1,maxW/img.width);const c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext('2d').drawImage(img,0,0,c.width,c.height);const data=c.toDataURL('image/jpeg',0.82);try{localStorage.setItem('pm_bg',data);applyBg();toast('Fundo aplicado e salvo no seu navegador! 🖼️');}catch(e){alert('Imagem muito grande para salvar no navegador. Tente uma imagem menor (até ~2 MB).');}URL.revokeObjectURL(url);ev.target.value='';};img.onerror=()=>alert('Não consegui ler essa imagem. Tente outro arquivo JPG ou PNG.');img.src=url;}
+try{const _th=localStorage.getItem('pm_theme')||'v18';document.body.dataset.theme=_th;const _s=document.getElementById('themeSel');if(_s)_s.value=_th;}catch(e){document.body.dataset.theme='v18';}
+applyBg();
+
+function toggleSearch(show){const el=document.getElementById('searchBar');el.style.display=show?'block':'none';if(show){const q=document.getElementById('q');q.focus();}}
+function toggleTheme(){setTheme(document.body.dataset.theme==='v18'?'v5':'v18');}
+async function hashPw(pw){try{const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(pw));return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');}catch(e){let h=0;for(const c of pw){h=(h*31+c.charCodeAt(0))>>>0}return 'h'+h;}}
+function updateAvatars(){const u=currentUser();if(!u)return;const html=u.avatar?`<img src="${u.avatar}">`:esc((u.nome||'N')[0].toUpperCase());const sa=document.getElementById('sideAvatar');if(sa)sa.innerHTML=html;const da=document.getElementById('dashAvatar');if(da)da.innerHTML=html;}
+function renderProfile(){const u=currentUser();if(!u)return;const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v||''};set('pf_nome',u.nome);set('pf_email',u.email);set('pf_cargo',u.cargo);set('pf_telefone',u.telefone);set('pf_bio',u.bio);const pv=document.getElementById('pf_avatarPreview');if(pv)pv.innerHTML=u.avatar?`<img src="${u.avatar}">`:esc((u.nome||'N')[0].toUpperCase());const ti=document.getElementById('pf_title');if(ti)ti.textContent=u.nome||'Meu perfil';const bg=(()=>{try{return localStorage.getItem('pm_bg')}catch(e){return null}})();const bs=document.getElementById('bgStatus');if(bs)bs.textContent=bg?'Fundo atual: imagem personalizada salva no navegador.':'Fundo atual: padrão do tema.';const ul=document.getElementById('pf_userList');if(ul)ul.innerHTML=users.map(x=>`<div class="usercard"><div class="avatar small" style="width:38px;height:38px">${x.avatar?`<img src="${x.avatar}">`:esc((x.nome||'?')[0].toUpperCase())}</div><div style="flex:1"><b>${esc(x.nome)}</b><p class="muted" style="margin:0">${esc(x.email||'sem email')} • ${esc(x.cargo||'')}</p></div>${x.id===currentUserId?'<span class="pill green">Em uso</span>':`<button class="btn ghost small" onclick="switchUser('${x.id}')">Entrar</button>`}${x.id!==currentUserId?`<button class="btn ghost small" onclick="deleteUser('${x.id}')">Excluir</button>`:''}</div>`).join('');}
+function saveProfile(){const u=currentUser();u.nome=document.getElementById('pf_nome').value.trim()||u.nome;u.email=document.getElementById('pf_email').value.trim();u.cargo=document.getElementById('pf_cargo').value.trim();u.telefone=document.getElementById('pf_telefone').value.trim();u.bio=document.getElementById('pf_bio').value.trim();saveUsers();toast('Perfil salvo! ✅');renderAll();}
+async function changePassword(){const u=currentUser();const atual=document.getElementById('pf_atual').value,nova=document.getElementById('pf_nova').value,conf=document.getElementById('pf_conf').value;if(!nova||nova.length<4){alert('A nova senha precisa ter pelo menos 4 caracteres.');return}if(nova!==conf){alert('A confirmação não confere com a nova senha.');return}if(u.senhaHash){if(!atual||await hashPw(atual)!==u.senhaHash){alert('Senha atual incorreta.');return}}u.senhaHash=await hashPw(nova);saveUsers();['pf_atual','pf_nova','pf_conf'].forEach(id=>document.getElementById(id).value='');toast('Senha alterada! 🔒');}
+function uploadAvatar(ev){const f=ev.target.files[0];if(!f)return;const img=new Image();const url=URL.createObjectURL(f);img.onload=()=>{const s=Math.min(1,400/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);c.getContext('2d').drawImage(img,0,0,c.width,c.height);currentUser().avatar=c.toDataURL('image/jpeg',0.85);saveUsers();URL.revokeObjectURL(url);ev.target.value='';toast('Foto atualizada! 📷');renderAll();};img.src=url;}
+async function switchUser(id){const u=users.find(x=>x.id===id);if(!u)return;if(u.senhaHash){const pw=prompt('Digite a senha de '+u.nome);if(!pw)return;if(await hashPw(pw)!==u.senhaHash){alert('Senha incorreta.');return}}save();currentUserId=id;try{localStorage.setItem(CUR_KEY,id)}catch(e){}db=dbByUser[id]||seed();dbByUser[id]=db;save();renderAll();showView('dashboard');toast('Bem-vindo(a), '+u.nome+'!');}
+async function createUserFromProfile(){const nome=document.getElementById('nu_nome').value.trim(),email=document.getElementById('nu_email').value.trim();if(!nome||!email){alert('Preencha nome e email do novo usuário.');return}const id='u_'+Date.now().toString(36);const senha=document.getElementById('nu_senha').value;const nu={id,nome,email,cargo:document.getElementById('nu_cargo').value.trim(),telefone:'',bio:'',avatar:'',senhaHash:senha?await hashPw(senha):''};users.push(nu);saveUsers();['nu_nome','nu_email','nu_senha','nu_cargo'].forEach(x=>document.getElementById(x).value='');save();currentUserId=id;try{localStorage.setItem(CUR_KEY,id)}catch(e){}db=seed();dbByUser[id]=db;save();renderAll();showView('dashboard');toast('Usuário '+nome+' criado! Cada um tem seus próprios projetos. 🎉');}
+function deleteUser(id){if(id===currentUserId){alert('Você está usando esta conta. Troque de usuário antes de excluí-la.');return}if(!confirm('Excluir este usuário e todos os projetos dele?'))return;users=users.filter(u=>u.id!==id);delete dbByUser[id];saveUsers();save();renderAll();}
+renderAll();
+</script></body></html>
